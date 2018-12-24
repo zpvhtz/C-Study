@@ -4,7 +4,7 @@
 #include <stdio.h>
 using namespace std;
 
-int main()
+void bai2()
 {
 	//Bài 01
 	printf("Bài 01:");
@@ -65,6 +65,6 @@ int main()
 	printf("Enter number: "); scanf("%f", &number2);
 	printf("Round of number: %d", (int)(number2 + 0.5));
 
-	while (true);
-	return 0;
+	/*while (true);
+	return 0;*/
 }

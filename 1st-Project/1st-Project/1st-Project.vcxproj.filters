@@ -21,5 +21,11 @@
     <ClCompile Include="2nd-file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="3rd-file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="4th-filecpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
