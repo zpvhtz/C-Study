@@ -24,7 +24,10 @@
     <ClCompile Include="3rd-file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="4th-filecpp.cpp">
+    <ClCompile Include="4th-file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="5th-file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
