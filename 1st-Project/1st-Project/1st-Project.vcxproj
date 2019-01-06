@@ -121,6 +121,8 @@
     <ClCompile Include="4th-file.cpp" />
     <ClCompile Include="5th-file.cpp" />
     <ClCompile Include="6th-file.cpp" />
+    <ClCompile Include="Pointer.cpp" />
+    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

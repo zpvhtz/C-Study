@@ -1,2 +1,2 @@
-﻿  6th-file.cpp
-  1st-Project.vcxproj -> D:\C\C-Study\1st-Project\Debug\1st-Project.exe
+﻿  Pointer.cpp
+d:\c\c-study\1st-project\1st-project\pointer.cpp(60): error C2040: 'x': 'int []' differs in levels of indirection from 'int'
