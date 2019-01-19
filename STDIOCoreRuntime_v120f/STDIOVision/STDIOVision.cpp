@@ -3,15 +3,16 @@
 void STDIOVisionMinMaxRange(double* min, double* max, double* init)
 {
 	*min = 0.0;
-	*max = 10.0;
-	*init = 2.0;
+	*max = 255;
+	*init = 1;
 }
 
 void STDIOVisionProcess(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
 	printf("STDIO DEBUG");
 	//GrayscaleImage(width, height, byte_per_pixel, data, value);
-	IncreaseBrightnessArtOfImage(width, height, byte_per_pixel, data, value);
+	DecreaseOpacityOfHalfImage(width, height, byte_per_pixel, data, value);
+	//IncreaseBrightnessArtOfImage(width, height, byte_per_pixel, data, value);
 }
 
 void GrayscaleImage(int width, int height, int byte_per_pixel, byte*& data, double value)
@@ -141,10 +142,44 @@ void BoundingBoxImage(int width, int height, int byte_per_pixel, byte*& data, do
 
 void DecreaseOpacityOfHalfImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	for (int row = 0; row < height; row++)
+	{
+		for (int col = width / 2; col < width; col++)
+		{
+			int index = (row * width + col) * byte_per_pixel;
+
+			*(data + index + 3) = (*(data + index + 3) * (255 - value)) / 255;
+		}
+	}
 }
 
 void SplitingAndSortingImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	int index[4] = { 0 };
+	byte component = 0;
+
+	int halfWidth = width / 2;
+	int halfHeight = height / 2;
+
+	for (int r = 0; r < halfHeight; r++)
+	{
+		for (int c = 0; c < halfWidth; c++)
+		{
+			index[0] = (r * width + c) * byte_per_pixel;
+			index[1] = ((r + height / 2) * width + c) * byte_per_pixel;
+			index[2] = ((r + height / 2) * width + c + width / 2) * byte_per_pixel;
+			index[3] = (r * width + c + width / 2) * byte_per_pixel;
+
+			for (int i = 0; i < byte_per_pixel; i++)
+			{
+				component = *(data + index[0] + i);
+				*(data + index[0] + i) = *(data + index[1] + i);
+				*(data + index[1] + i) = *(data + index[2] + i);
+				*(data + index[2] + i) = *(data + index[3] + i);
+				*(data + index[3] + i) = component;
+			}
+		}
+	}	
 }
 
 void BlendingAreasOfImage(int width, int height, int byte_per_pixel, byte*& data, double value)
