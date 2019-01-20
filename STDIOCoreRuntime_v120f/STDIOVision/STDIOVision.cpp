@@ -9,9 +9,7 @@ void STDIOVisionMinMaxRange(double* min, double* max, double* init)
 
 void STDIOVisionProcess(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
-	printf("STDIO DEBUG");
-	//GrayscaleImage(width, height, byte_per_pixel, data, value);
-	DecreaseOpacityOfHalfImage(width, height, byte_per_pixel, data, value);
+	ReplaceAnAreaOfImage(width, height, byte_per_pixel, data, value);
 	//IncreaseBrightnessArtOfImage(width, height, byte_per_pixel, data, value);
 }
 
@@ -184,10 +182,172 @@ void SplitingAndSortingImage(int width, int height, int byte_per_pixel, byte*& d
 
 void BlendingAreasOfImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	int X = 0, Y = 1, W = 2, H = 3;
+
+	int square[4] = { 100, 100, 100, 100 };
+
+	if (square[X] < 0)
+		square[X] = 0;
+	if (square[X] + square[W] > width)
+		square[W] = width - square[X];
+	if (square[Y] < 0)
+		square[Y] = 0;
+	if (square[Y] + square[H] > height)
+		square[H] = height - square[Y];
+
+	byte* layer = new byte[width * height * 4];
+	
+	for (int index = 0; index < width * height; index++)
+	{
+		int i = index * 4;
+
+		int r = index / width;
+		int c = index % width;
+
+		*(layer + i + 0) = 0;
+		*(layer + i + 1) = 0;
+		*(layer + i + 2) = 255;
+
+		if (c < square[X] ||
+			c > square[X] + square[W] ||
+			r < square[Y] ||
+			r > square[Y] + square[H])
+			*(layer + i + 3) = (int)value;
+		else
+			*(layer + i + 3) = 0;
+	}
+
+	printf("Alpha: %d\n", (int)value);
+
+	int iData;
+	int iLayer;
+	int alpha;
+
+	for (int index = 0; index < width * height; index++)
+	{
+		iData = index * byte_per_pixel;
+		iLayer = index * 4;
+
+		alpha = layer[iLayer + 3];
+
+		data[iData + 0] = (data[iData + 0] * (255 - alpha) + layer[iLayer + 0] * alpha) / 255;
+		data[iData + 1] = (data[iData + 1] * (255 - alpha) + layer[iLayer + 1] * alpha) / 255;
+		data[iData + 2] = (data[iData + 2] * (255 - alpha) + layer[iLayer + 2] * alpha) / 255;
+	}
+
+	delete layer;
 }
 
 void ReplaceAnAreaOfImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	/*int X = 0, Y = 1, W = 2, H = 3;
+
+	int square[4] = { 100, 100, 100, 100 };
+
+	if (square[X] < 0)
+		square[X] = 0;
+	if (square[X] + square[W] > width)
+		square[W] = width - square[X];
+	if (square[Y] < 0)
+		square[Y] = 0;
+	if (square[Y] + square[H] > height)
+		square[H] = height - square[Y];
+
+	byte* layer = new byte[square[W] * square[H] * 4];
+	int pos = 0;
+
+	for (int row = square[Y]; row < square[Y] + square[H]; row++)
+	{
+		for (int col = square[X]; col < square[X] + square[W]; col++)
+		{
+			int index = (row * width + col) * 4;
+			*(layer + pos + 0) = *(data + index + 0);
+			*(layer + pos + 1) = *(data + index + 1);
+			*(layer + pos + 2) = *(data + index + 2);
+			*(layer + pos + 3) = *(data + index + 3);
+			
+			if (*(data + index + 3) >= 0 && *(data + index + 3) <= 255)
+			{
+				*(layer + pos + 3) = *(data + index + 3);
+			}
+			else
+			{
+				*(layer + pos + 3) = 0;
+			}
+
+			pos++;
+		}
+	}
+
+	pos = 0;
+
+	int newPosition[2] = { 200, 200 };
+	for (int row = newPosition[Y]; row < newPosition[Y] + square[H]; row++)
+	{
+		for (int col = newPosition[X]; col < newPosition[X] + square[W]; col++)
+		{
+			int index = (row * width + col) * 4;
+			*(data + index + 0) = *(layer + pos + 0);
+			*(data + index + 1) = *(layer + pos + 1);
+			*(data + index + 2) = *(layer + pos + 2);
+			*(data + index + 3) = *(layer + pos + 3);
+			pos++;
+		}
+	}
+
+	delete layer;*/
+
+	int X = 0, Y = 1, W = 2, H = 3;
+	int rect[4] = { 100, 100, 100, 100 };
+
+	if (rect[X] < 0)
+		rect[X] = 0;
+	if (rect[X] + rect[W] > width)
+		rect[W] = width - rect[X];
+	if (rect[Y] < 0)
+		rect[Y] = 0;
+	if (rect[Y] + rect[H] > height)
+		rect[H] = height - rect[Y];
+
+	int dataIndex = 0;
+	int tempIndex = 0;
+
+	byte* imgTemp = new byte[rect[W] * rect[H] * byte_per_pixel];
+
+	for (int r = 0; r < rect[H]; r++)
+	{
+		for (int c = 0; c < rect[W]; c++)
+		{
+			tempIndex = (r * rect[W] + c) * byte_per_pixel;
+			dataIndex = ((r + rect[Y]) * width + c + rect[X]) * byte_per_pixel;
+
+			*(imgTemp + tempIndex + 0) = *(data + dataIndex + 0);
+			*(imgTemp + tempIndex + 1) = *(data + dataIndex + 1);
+			*(imgTemp + tempIndex + 2) = *(data + dataIndex + 2);
+			if (byte_per_pixel == 4)
+				*(imgTemp + tempIndex + 3) = *(data + dataIndex + 3);
+		}
+	}
+
+	int newPosition[2] = { 200, 200 };
+
+	for (int r = 0; r < rect[H]; r++)
+	{
+		for (int c = 0; c < rect[W]; c++)
+		{
+			tempIndex = (r * rect[W] + c) * byte_per_pixel;
+			dataIndex = ((r + newPosition[Y]) * width + c + newPosition[X]) * byte_per_pixel;
+
+			*(data + dataIndex + 0) = *(imgTemp + tempIndex + 0);
+			*(data + dataIndex + 1) = *(imgTemp + tempIndex + 1);
+			*(data + dataIndex + 2) = *(imgTemp + tempIndex + 2);
+			if (byte_per_pixel == 4)
+				*(data + dataIndex + 3) = *(imgTemp + tempIndex + 3);
+		}
+	}
+
+	delete[] imgTemp;
+
 }
 
 void FlipAnAreaOfImage(int width, int height, int byte_per_pixel, byte*& data, double value)
