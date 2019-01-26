@@ -9,8 +9,34 @@ void STDIOVisionMinMaxRange(double* min, double* max, double* init)
 
 void STDIOVisionProcess(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
-	ReplaceAnAreaOfImage(width, height, byte_per_pixel, data, value);
+	//ReplaceAnAreaOfImage(width, height, byte_per_pixel, data, value);
 	//IncreaseBrightnessArtOfImage(width, height, byte_per_pixel, data, value);
+	unsigned int des = 0x12345678;
+	unsigned char src[4];
+	//=> src[4] = { 0x78, 0x56, 0x34, 0x12 }.
+	IntegerToByteArray(des, src);
+}
+
+void ByteArrayToInteger(int des, const unsigned char* src)
+{
+	des = src[3];
+	des = des | (src[2] << 8);
+	des = des | (src[1] << 16);
+	des = des | (src[0] << 24);
+
+	printf("DES: %x\n", des);
+	printf("SRC: %x %x %x %x", src[0], src[1], src[2], src[3]);
+}
+
+void IntegerToByteArray(unsigned int des, unsigned char* src)
+{
+	src[0] = des >> 24;
+	src[1] = des >> 16; //(des & 0x00ff0000) >> 16;
+	src[2] = des >> 8; //(des & 0x0000ff00) >> 8;
+	src[3] = des;
+
+	printf("DES: %x\n", des);
+	printf("SRC: %x %x %x %x", src[0], src[1], src[2], src[3]);
 }
 
 void GrayscaleImage(int width, int height, int byte_per_pixel, byte*& data, double value)

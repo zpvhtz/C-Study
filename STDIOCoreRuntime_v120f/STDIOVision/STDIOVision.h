@@ -31,3 +31,6 @@ void FlipAnImageHorizontal(int width, int height, int byte_per_pixel, byte*& dat
 void FlipAnImageVertical(int width, int height, int byte_per_pixel, byte*& data, double value);
 void CompressImageTo16bit(int width, int height, int byte_per_pixel, byte*& data, double value);
 void SoftlightImage(int width, int height, int byte_per_pixel, byte *& data, double value);
+
+void ByteArrayToInteger(int des, const unsigned char* src);
+void IntegerToByteArray(unsigned int des, unsigned char* src);
