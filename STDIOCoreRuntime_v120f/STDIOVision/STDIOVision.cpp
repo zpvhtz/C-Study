@@ -9,12 +9,12 @@ void STDIOVisionMinMaxRange(double* min, double* max, double* init)
 
 void STDIOVisionProcess(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
-	//ReplaceAnAreaOfImage(width, height, byte_per_pixel, data, value);
-	//IncreaseBrightnessArtOfImage(width, height, byte_per_pixel, data, value);
-	unsigned int des = 0x12345678;
-	unsigned char src[4];
-	//=> src[4] = { 0x78, 0x56, 0x34, 0x12 }.
-	IntegerToByteArray(des, src);
+	SimpleEncryptImage(width, height, byte_per_pixel, data, value);
+}
+
+void BGR888ToBGR565(unsigned char* color565, const unsigned char* color888)
+{
+	
 }
 
 void ByteArrayToInteger(int des, const unsigned char* src)
@@ -390,6 +390,16 @@ void ZoomInAndBlendingImage(int width, int height, int byte_per_pixel, byte*& da
 
 void InvertImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	for (int row = 0; row < height; row++)
+	{
+		for (int col = 0; col < width; col++)
+		{
+			int index = (row * width + col) * byte_per_pixel;
+			*(data + index + 0) = ~*(data + index + 0);
+			*(data + index + 1) = ~*(data + index + 1);
+			*(data + index + 2) = ~*(data + index + 2);
+		}
+	}
 }
 
 void CompressImage(int width, int height, int byte_per_pixel, byte*& data, double value)
@@ -402,6 +412,19 @@ void DecompressImage(int width, int height, int byte_per_pixel, byte*& data, dou
 
 void SimpleEncryptImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	int resolution = width * height;
+	int i = 0;
+
+	byte color[3] = { 0, 136, 255 };
+
+	for (int index = 0; index < resolution; index++)
+	{
+		i = index * byte_per_pixel;
+
+		*(data + i + 0) = *(data + i + 0) ^ color[0];
+		*(data + i + 1) = *(data + i + 1) ^ color[1];
+		*(data + i + 2) = *(data + i + 2) ^ color[2];
+	}
 }
 
 void BlurImage(int width, int height, int byte_per_pixel, byte* &data, double value)

@@ -34,3 +34,4 @@ void SoftlightImage(int width, int height, int byte_per_pixel, byte *& data, dou
 
 void ByteArrayToInteger(int des, const unsigned char* src);
 void IntegerToByteArray(unsigned int des, unsigned char* src);
+void BGR888ToBGR565(unsigned int color565, const unsigned char* color888);
