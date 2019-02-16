@@ -1,15 +1,16 @@
 #include "STDIOCoreRuntime.h"
+#include "string.h"
 
 void STDIOVisionMinMaxRange(double* min, double* max, double* init)
 {
 	*min = 0.0;
-	*max = 255;
+	*max = 10;
 	*init = 1;
 }
 
 void STDIOVisionProcess(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
-	SimpleEncryptImage(width, height, byte_per_pixel, data, value);
+	BloomImage(width, height, byte_per_pixel, data, value);
 }
 
 void BGR888ToBGR565(unsigned char* color565, const unsigned char* color888)
@@ -429,6 +430,87 @@ void SimpleEncryptImage(int width, int height, int byte_per_pixel, byte*& data, 
 
 void BlurImage(int width, int height, int byte_per_pixel, byte* &data, double value)
 {
+	int radius = (int)value;
+
+	if (radius == 0)
+		return;
+
+	byte* temp = data;
+
+	int resolution = width * height;
+
+	data = new byte[resolution * byte_per_pixel];
+
+	int r0;
+	int c0;
+
+	int hA;
+	int hB;
+	int wA;
+	int wB;
+
+	int color[3];
+	int count;
+
+	unsigned int radius2 = radius * radius;
+
+	for (int index0 = 0; index0 < resolution; index0++)
+	{
+		r0 = index0 / width;
+		c0 = index0 % width;
+
+		hA = r0 - radius >= 0 ? r0 - radius : 0;
+		hB = r0 + radius <= height ? r0 + radius : height;
+
+		wA = c0 - radius >= 0 ? c0 - radius : 0;
+		wB = c0 + radius <= width ? c0 + radius : width;
+
+		color[0] = color[1] = color[2] = count = 0;
+
+		unsigned int distance2;
+		int index;
+
+		for (int r = hA; r < hB; r++)
+		{
+			for (int c = wA; c < wB; c++)
+			{
+				distance2 = (c - c0) *  (c - c0) + (r - r0) * (r - r0);
+
+				if (c0 >= width / 2)
+				{
+					if (distance2 < radius2)
+					{
+						index = (r * width + c) * byte_per_pixel;
+
+						color[0] += temp[index + 0];
+						color[1] += temp[index + 1];
+						color[2] += temp[index + 2];
+
+						count++;
+					}
+				}
+				else
+				{
+					index = (r * width + c) * byte_per_pixel;
+
+					color[0] += temp[index + 0];
+					color[1] += temp[index + 1];
+					color[2] += temp[index + 2];
+
+					count++;
+				}
+			}
+		}
+
+		data[index0 * byte_per_pixel + 0] = color[0] / count;
+		data[index0 * byte_per_pixel + 1] = color[1] / count;
+		data[index0 * byte_per_pixel + 2] = color[2] / count;
+
+		if (byte_per_pixel == 4)
+			data[index0 * byte_per_pixel + 3] = temp[index0 * byte_per_pixel + 3];
+	}
+
+	delete temp;
 }
 
 void MotionBlurImage(int width, int height, int byte_per_pixel, byte*& data, double value)
@@ -437,6 +519,50 @@ void MotionBlurImage(int width, int height, int byte_per_pixel, byte*& data, dou
 
 void BloomImage(int width, int height, int byte_per_pixel, byte*& data, double value)
 {
+	byte* original = data;
+
+	int imageSize = width * height * byte_per_pixel;
+
+	data = new byte[imageSize];
+	for (int i = 0; i < imageSize; i++)
+		data[i] = original[i];
+
+	SoftlightImage(width, height, byte_per_pixel, data, value);
+	IncreaseBrightnessOfImage(width, height, byte_per_pixel, data, value);
+	BlurImage(width, height, byte_per_pixel, data, value);
+
+	int component = 0;
+	int index = 0;
+
+	float factor = 1.0;
+
+	for (int r = 0; r < height; r++)
+	{
+		for (int c = 0; c < width; c++)
+		{
+			index = (r * width + c) * byte_per_pixel;
+
+			component = data[index + 0] * factor + original[index + 0];
+			if (component > 255)
+				component = 255;
+			data[index + 0] = component;
+
+			component = data[index + 1] * factor + original[index + 1];
+			if (component > 255)
+				component = 255;
+			data[index + 1] = component;
+
+			component = data[index + 2] * factor + original[index + 2];
+			if (component > 255)
+				component = 255;
+			data[index + 2] = component;
+
+			if (byte_per_pixel == 4)
+				data[index + 3] = original[index + 3];
+		}
+	}
+
+	delete[] original;
 }
 
 void CCBlurImage(int width, int height, int byte_per_pixel, byte*& data, double value)
@@ -469,4 +595,44 @@ void CompressImageTo16bit(int width, int height, int byte_per_pixel, byte*& data
 
 void SoftlightImage(int width, int height, int byte_per_pixel, byte *& data, double value)
 {
+	/*unsigned int resolution = width * height;
+
+	for (int index = 0; index < resolution; index++)
+	{
+		data[index * byte_per_pixel + 2] = data[index * byte_per_pixel + 2] > 128 ? data[index * byte_per_pixel + 2] : 0;
+		data[index * byte_per_pixel + 1] = data[index * byte_per_pixel + 1] > 128 ? data[index * byte_per_pixel + 1] : 0;
+		data[index * byte_per_pixel + 0] = data[index * byte_per_pixel + 0] > 128 ? data[index * byte_per_pixel + 0] : 0;
+	}*/
+
+	int resolution = width * height;
+	int index = -1;
+
+	byte* result = new byte[width * height * byte_per_pixel];
+
+	for (int i = 0; i < resolution; i++)
+	{
+		index = i * byte_per_pixel;
+
+		if (data[index + 0] > 128 ||
+			data[index + 1] > 128 ||
+			data[index + 2] > 128)
+		{
+			result[index + 0] = data[index + 0];
+			result[index + 1] = data[index + 1];
+			result[index + 2] = data[index + 2];
+		}
+		else
+		{
+			result[index + 0] = 0;
+			result[index + 1] = 0;
+			result[index + 2] = 0;
+		}
+
+		if (byte_per_pixel == 4)
+			result[index + 3] = data[index + 3];
+	}
+	
+
+	delete[] data;
+	data = result;
 }
