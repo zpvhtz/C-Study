@@ -1,0 +1,4 @@
+﻿  1st-file.cpp
+d:\c\c-study\binaryfile\binaryfile\1st-file.cpp(55): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'size_t'
+  d:\c\c-study\binaryfile\binaryfile\1st-file.cpp(55): note: consider using '%zd' in the format string
+  BinaryFile.vcxproj -> D:\C\C-Study\BinaryFile\x64\Debug\BinaryFile.exe

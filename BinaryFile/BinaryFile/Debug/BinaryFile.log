@@ -1,0 +1,2 @@
+﻿  1st-file.cpp
+d:\c\c-study\binaryfile\binaryfile\1st-file.cpp(23): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "pch.h"' to your source?
